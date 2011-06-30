@@ -202,12 +202,15 @@ def getApplication(keyFilepath, authorizedKeysFilepath, ports):
 ### Configuration
 keyFilepath = FilePath('server.key')
 authorizedKeysFilepath = FilePath('authorized_keys')
-ports = (
+ports = [
     2222,
     # 2223,
     # 2224,
-)
+]
+# To add a range of ports, use:
+# ports.extend(range(1025, 1050))
 ### End of configuration
+
 application = getApplication(keyFilepath, authorizedKeysFilepath, ports)
 
 if __name__ == '__main__':
