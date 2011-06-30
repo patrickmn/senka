@@ -1,0 +1,79 @@
+Senka is an SSH server which only permits traffic forwarding, and for a list of
+predefined users (identified by their RSA key), which means it's essentially
+a secure, portable tunneler/proxy server.
+
+Senka can be used on any server that has Python, regardless of whether the user
+has administrator privileges or access to e.g. the local OpenSSH server.
+
+Setup:
+
+  - One-time client setup:
+       - Linux/*BSD/OS X:
+           1. Run the command: ssh-keygen -f senka.key
+	   2. (Optional) Enter a passphrase for your client key (recommended)
+	   3. Copy the contents of the file senka.key.pub (you will need this for the server)
+       - Windows:
+           1. Download PuTTY: http://www.chiark.greenend.org.uk/~sgtatham/putty/download.html
+	      (Download the 'everything' package, or PuTTY and PuTTYgen.)
+	   2. Run PuTTYgen
+	   3. Click "Generate" (move the mouse if instructed)
+	   4. (Optional) Enter a passphrase (recommended)
+	   5. Click "Save private key", and save the .ppk file (e.g. senka.ppk) somewhere safe
+	   6. Save the contents of the "Public key for pasting into OpenSSH..." field
+	      (you will need this for the server)
+	   7. Close PuTTYgen
+	   8. Open PuTTY
+	   9. Enter/do the following:
+	      * Host name: <username>@<your server's hostname/IP> (e.g. patrick@myserver.com)
+	      * Port: The port which Senka will listen on (default 2222)
+	      * Under Connection -> SSH -> Auth:
+	          Private key file for authentication: Select the .ppk file you saved
+	      * Under Connection -> SSH -> Tunnels:
+	          Source port: Some local, unused port (e.g. 31337)
+		  Type: Dynamic
+		  click "Add"
+	      * Go back to "Session" (top menu item)
+	      * Under "Saved Sessions", enter some name (e.g. Senka), and click "Save"
+
+  - One-time server setup:
+      1. Run senka.py. This will generate a file, authorized_keys, which stores the
+         list of users (and their keys) who are allowed to connect to the server
+      2. Edit authorized_keys
+      3. Add a line containing your username and public key string, e.g.:
+         patrick ssh-rsa AAAAB3NzaC1yc2EAAAABJQAAAIEA1e...
+      4. Save the file
+
+Usage:
+
+  - Server:
+      1. Run senka.py. It should now listen on port 2222.
+         (You can run senka.py <port number>, or senka.py <list of ports>, if you want!)
+
+  - Client, Linux/*BSD/OS X:
+      1. Run the command: ssh -i senka.key -D 127.0.0.1:31337 <username>@<server.com> -p 2222 -N
+      2. In any application that supports connecting through a SOCKS proxy (or system-wide
+         via e.g. GNOME -> System Settings -> Proxy), set the following:
+	   * Proxy type: SOCKS5 (or just SOCKS)
+	   * Host: 127.0.0.1
+	   * Port: 31337
+	   (No username/password)
+
+  - Client, Windows:
+      1. Open PuTTY
+      2. Double-click your previously saved session, e.g. "Senka"
+      3. Enter the password for your private key, if prompted
+      4. Minimize the PuTTY window
+      5. In any application that supports connecting through a SOCKS proxy, set the following:
+	   * Proxy type: SOCKS5 (or just SOCKS)
+	   * Host: 127.0.0.1
+	   * Port: 31337
+	   (No username/password)
+
+       To use the proxy system-wide, go to Control Panel -> Internet Options -> Connections ->
+       LAN settings, select "Use a proxy server for your LAN", then click "Advanced", and under
+       "Socks:" enter: Proxy address to use: 127.0.0.1, Port: 31337. Click OK in all windows.
+
+  Congratulations! Any connection made through the local SOCKS proxy is now sent, encrypted, through
+  the Senka server, creating a tunnel which swiftly defeats any pesky, restrictive firewalls.
+
+  Happy browsing!
