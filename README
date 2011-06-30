@@ -1,6 +1,7 @@
 Senka is an SSH server which only permits traffic forwarding, and only for a list of
 predefined users (identified by RSA keys), which means it's essentially a secure,
-portable tunneler/proxy server.
+portable tunneler/proxy server. It's ideal for bypassing outgoing firewall restrictions,
+or encrypting your traffic on insecure/monitored networks.
 
 Senka can be used on any server that has Python, regardless of whether the user
 has administrator privileges or access to e.g. the local OpenSSH server.
@@ -54,7 +55,7 @@ Usage:
       1. Run twistd -noy senka.tac. It should now listen on port 2222.
          (You can define a list of ports at the bottom of senka.tac if you want!)
 
-  - Client, Linux/*BSD/OS X:
+  - Linux/*BSD/OS X client:
       1. Run the command: ssh -i senka.key -D 127.0.0.1:31337 <username>@<server.com> -p 2222 -N
          (This starts a local proxy server (on port 31337) which tunnels data through Senka.)
       2. Keep the ssh session open. (You will not see any output.)
@@ -65,7 +66,7 @@ Usage:
 	   * Port: 31337
 	   (No username/password)
 
-  - Client, Windows:
+  - Windows client:
       1. Open PuTTY
       2. Double-click your previously saved session, e.g. "Senka"
          (This starts a local proxy server (on port 31337) which tunnels data through Senka.)
