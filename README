@@ -1,4 +1,4 @@
-Senka is an SSH server which only permits traffic forwarding, and for a list of
+Senka is an SSH server which only permits traffic forwarding, and only for a list of
 predefined users (identified by their RSA key), which means it's essentially
 a secure, portable tunneler/proxy server.
 
