@@ -157,7 +157,7 @@ def parseAuthorizedKeysFile(filepath):
             print("No client keys defined in {0} -- see the file for examples.".format(filepath.path))
             sys.exit()
     else:
-        # Don't edit. Run 'python senka.py' once, then modify authorized_keys.
+        # Don't edit. Run 'twistd -noy senka.tac' once, then modify authorized_keys.
         with filepath.open('w+b') as f:
             f.write(
                 """# Examples:
