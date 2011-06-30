@@ -169,9 +169,6 @@ def parseAuthorizedKeysFile(filepath):
             print("Add your clients' usernames and public keys to this file in the format '<username> <public key>' (one set per line), then run Senka again. If a username has more than one public key, make several lines for that same username.")
             sys.exit()
 
-def getAuthorizedKeysChecker(filepath):
-    return PublicKeyCredentialsChecker(parseAuthorizedKeysFile(filepath))
-
 def getApplication(keyFilepath, authorizedKeysFilepath, ports):
 
     def refreshAuthorizedKeys():
