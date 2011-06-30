@@ -194,7 +194,6 @@ def getApplication(keyFilepath, authorizedKeysFilepath, ports):
     notifier.startReading()
     notifier.watch(authorizedKeysFilepath, callbacks=[notify,])
 
-    listeners = []
     for port in ports:
         internet.TCPServer(port, serverfactory).setServiceParent(application)
     return application
