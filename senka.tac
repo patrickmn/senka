@@ -204,8 +204,8 @@ keyFilepath = FilePath('server.key')
 authorizedKeysFilepath = FilePath('authorized_keys')
 ports = [
     2222,
-    # 2223,
-    # 2224,
+    # 3025,
+    # 4700,
 ]
 # To add a range of ports, use:
 # ports.extend(range(1025, 1050))
