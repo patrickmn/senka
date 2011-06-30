@@ -51,7 +51,9 @@ Usage:
 
   - Client, Linux/*BSD/OS X:
       1. Run the command: ssh -i senka.key -D 127.0.0.1:31337 <username>@<server.com> -p 2222 -N
-      2. In any application that supports connecting through a SOCKS proxy (or system-wide
+         (This starts a local proxy server (on port 31337) which tunnels data through Senka.)
+      2. Keep the ssh session open. (You will not see any output.)
+      3. In any application that supports connecting through a SOCKS proxy (or system-wide
          via e.g. GNOME -> System Settings -> Proxy), set the following:
 	   * Proxy type: SOCKS5 (or just SOCKS)
 	   * Host: 127.0.0.1
@@ -61,8 +63,9 @@ Usage:
   - Client, Windows:
       1. Open PuTTY
       2. Double-click your previously saved session, e.g. "Senka"
+         (This starts a local proxy server (on port 31337) which tunnels data through Senka.)
       3. Enter the password for your private key, if prompted
-      4. Minimize the PuTTY window
+      4. Keep the PuTTY window/session open. (You will not see any output.)
       5. In any application that supports connecting through a SOCKS proxy, set the following:
 	   * Proxy type: SOCKS5 (or just SOCKS)
 	   * Host: 127.0.0.1
@@ -77,3 +80,10 @@ Usage:
   the Senka server, creating a tunnel which swiftly defeats any pesky, restrictive firewalls.
 
   Happy browsing!
+
+Tips:
+
+  - Windows:
+      If you connect to several different Senka servers, you might want to use the same key file,
+      and also only have to unlock it once. Use Pageant (from the PuTTY package) to keep your
+      key in memory. It will automatically be used for any new PuTTY/Senka connections.
