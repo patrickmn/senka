@@ -32,10 +32,11 @@ except:
 
 import sys
 import base64
+from twisted.application import internet, service
 from twisted.cred import portal, checkers, credentials
 from twisted.conch import error as concherror, avatar, recvline, interfaces as conchinterfaces
 from twisted.conch.ssh import factory, userauth, connection, keys, session, forwarding
-from twisted.internet import reactor, inotify, error
+from twisted.internet import inotify
 from twisted.python import failure, log, randbytes
 from twisted.python.filepath import FilePath
 from zope.interface import implements
@@ -153,7 +154,7 @@ def parseAuthorizedKeysFile(filepath):
         if authorizedKeys:
             return authorizedKeys
         else:
-            log.err("No client keys defined in {0} -- see the file for examples.".format(filepath.path))
+            print("No client keys defined in {0} -- see the file for examples.".format(filepath.path))
             sys.exit()
     else:
         # Don't edit. Run 'python senka.py' once, then modify authorized_keys.
@@ -164,35 +165,14 @@ def parseAuthorizedKeysFile(filepath):
 #    user2 ssh-rsa iO2NpFXc7ERmG2N...
 #    user2 ssh-rsa 39AlR8iZHYZXCzn...
 """)
-            log.msg("Authorized keys file created: {0}".format(filepath.path))
-            log.msg("Add your clients' usernames and public keys to this file in the format '<username> <public key>' (one set per line), then run Senka again. If a username has more than one public key, make several lines for that same username.")
+            print("Authorized keys file created: {0}".format(filepath.path))
+            print("Add your clients' usernames and public keys to this file in the format '<username> <public key>' (one set per line), then run Senka again. If a username has more than one public key, make several lines for that same username.")
             sys.exit()
 
 def getAuthorizedKeysChecker(filepath):
     return PublicKeyCredentialsChecker(parseAuthorizedKeysFile(filepath))
 
-def main():
-    ports = [
-        2222,
-    ]
-    keyFilepath = FilePath('server.key')
-    authorizedKeysFilepath = FilePath('authorized_keys')
-
-    log.startLogging(sys.stdout)
-    args = sys.argv[1:]
-    if args:
-        newPorts = []
-        for arg in args:
-            try:
-                arg = int(arg)
-                if 1 <= arg <= 65535:
-                    newPorts.append(arg)
-                else:
-                    log.err("Invalid port {0}. Specify a number between 1-65535.".format(arg))
-            except:
-                log.err("Invalid port {0}. Use port numbers as arguments, e.g. {1} 2222 143 443 587 993".format(arg, sys.argv[0]))
-        if newPorts:
-            ports = newPorts
+def getApplication(keyFilepath, authorizedKeysFilepath, ports):
 
     def refreshAuthorizedKeys():
         checker.authorizedKeys = parseAuthorizedKeysFile(authorizedKeysFilepath)
@@ -201,6 +181,7 @@ def main():
         if mask == inotify.IN_MODIFY:
             refreshAuthorizedKeys()
 
+    application = service.Application("senka")
     key = getRSAKey(keyFilepath)
     checker = PublicKeyCredentialsChecker(parseAuthorizedKeysFile(authorizedKeysFilepath))
     serverfactory = factory.SSHFactory()
@@ -215,17 +196,19 @@ def main():
 
     listeners = []
     for port in ports:
-        try:
-            listener = reactor.listenTCP(port, serverfactory)
-            listeners.append(listener)
-        except error.CannotListenError, e:
-            log.err("Error listening on port {0}: {1}".format(port, e))
-            if 1 <= port <= 1024:
-                log.err("Only root can listen on ports 1-1024. It is _NOT_ recommended to run Senka as root!")
-    if listeners:
-        log.msg("Listening on port{0} {1}. Senka server's public key: {2}"
-                .format('s' if len(listeners) > 1 else '', ', '.join(str(listener.port) for listener in listeners), key.public().toString('openssh')))
-        reactor.run()
+        internet.TCPServer(port, serverfactory).setServiceParent(application)
+    return application
+
+### Configuration
+keyFilepath = FilePath('server.key')
+authorizedKeysFilepath = FilePath('authorized_keys')
+ports = (
+    2222,
+    # 2223,
+    # 2224,
+)
+### End of configuration
+application = getApplication(keyFilepath, authorizedKeysFilepath, ports)
 
 if __name__ == '__main__':
-    main()
+    print("Run Senka with twistd -noy senka.tac or twistd -oy senka.tac (daemon mode).")

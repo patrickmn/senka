@@ -41,8 +41,8 @@ Setup:
         - Ubuntu/Debian: sudo apt-get install python-twisted python-openssl
         - Fedora/SUSE:   sudo yum install python-twisted python-openssl
 
-      1. Run senka.py. This will generate a file, authorized_keys, which stores the
-         list of users (and their keys) who are allowed to connect to the server
+      1. Run twistd -noy senka.tac. This will generate a file, authorized_keys, which stores
+         the list of users (and their keys) who are allowed to connect to the server
       2. Edit authorized_keys
       3. Add a line containing your username and public key string, e.g.:
          patrick ssh-rsa AAAAB3NzaC1yc2EAAAABJQAAAIEA1e...
@@ -51,8 +51,8 @@ Setup:
 Usage:
 
   - Server:
-      1. Run senka.py. It should now listen on port 2222.
-         (You can run senka.py <port number>, or senka.py <list of ports>, if you want!)
+      1. Run twistd -noy senka.tac. It should now listen on port 2222.
+         (You can define a list of ports at the bottom of senka.tac if you want!)
 
   - Client, Linux/*BSD/OS X:
       1. Run the command: ssh -i senka.key -D 127.0.0.1:31337 <username>@<server.com> -p 2222 -N
