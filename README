@@ -77,7 +77,8 @@ Usage:
        "Socks:" enter: Proxy address to use: 127.0.0.1, Port: 31337. Click OK in all windows.
 
   Congratulations! Any connection made through the local SOCKS proxy is now sent, encrypted, through
-  the Senka server, creating a tunnel which swiftly defeats any pesky, restrictive firewalls.
+  the Senka server, creating a tunnel which swiftly defeats any pesky, restrictive firewalls and
+  local network monitoring.
 
   Happy browsing!
 
