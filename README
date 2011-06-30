@@ -4,7 +4,8 @@ portable tunneler/proxy server. It's ideal for bypassing outgoing firewall restr
 or encrypting your traffic on insecure/monitored networks.
 
 Senka can be used on any server that has Python, regardless of whether the user
-has administrator privileges or access to e.g. the local OpenSSH server.
+has administrator privileges or access to e.g. the local OpenSSH server, and can be
+connected to by any client which has either ssh or PuTTY.
 
 Setup:
 
