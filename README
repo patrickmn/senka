@@ -36,6 +36,11 @@ Setup:
 	      * Under "Saved Sessions", enter some name (e.g. Senka), and click "Save"
 
   - One-time server setup:
+
+      Prerequisite: You need Python, Twisted, and pyOpenSSL. Usually it's enough to do:
+        - Ubuntu/Debian: sudo apt-get install python-twisted python-openssl
+        - Fedora/SUSE:   sudo yum install python-twisted python-openssl
+
       1. Run senka.py. This will generate a file, authorized_keys, which stores the
          list of users (and their keys) who are allowed to connect to the server
       2. Edit authorized_keys
