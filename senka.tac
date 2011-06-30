@@ -21,7 +21,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 """
 
-__version__ = '1.0'
+__version__ = '1.1'
 
 try:
     from twisted.internet import epollreactor
@@ -30,17 +30,20 @@ except:
     # Cross-platform select reactor (default) is used.
     pass
 
-import sys
 import base64
 from twisted.application import internet, service
 from twisted.cred import portal, checkers, credentials
 from twisted.conch import error as concherror, avatar, recvline, interfaces as conchinterfaces
 from twisted.conch.ssh import factory, userauth, connection, keys, session, forwarding
-from twisted.internet import inotify
 from twisted.python import failure, log, randbytes
 from twisted.python.filepath import FilePath
 from zope.interface import implements
 from Crypto.PublicKey import RSA
+
+try:
+    from twisted.internet import inotify
+except:
+    pass
 
 class PublicKeyCredentialsChecker(object):
     implements(checkers.ICredentialsChecker)
@@ -138,8 +141,8 @@ def getRSAKey(filepath):
     return key
 
 def parseAuthorizedKeysFile(filepath):
+    authorizedKeys = {}
     if filepath.exists():
-        authorizedKeys = {}
         with filepath.open() as f:
             for line in f:
                 if line.startswith('#') or not line.strip():
@@ -151,11 +154,8 @@ def parseAuthorizedKeysFile(filepath):
                 if not username in authorizedKeys:
                     authorizedKeys[username] = list()
                 authorizedKeys[username].append(key)
-        if authorizedKeys:
-            return authorizedKeys
-        else:
+        if not authorizedKeys:
             print("No client keys defined in {0} -- see the file for examples.".format(filepath.path))
-            sys.exit()
     else:
         # Don't edit. Run 'twistd -noy senka.tac' once, then modify authorized_keys.
         with filepath.open('w+b') as f:
@@ -167,29 +167,33 @@ def parseAuthorizedKeysFile(filepath):
 """)
             print("Authorized keys file created: {0}".format(filepath.path))
             print("Add your clients' usernames and public keys to this file in the format '<username> <public key>' (one set per line), then run Senka again. If a username has more than one public key, make several lines for that same username.")
-            sys.exit()
+    return authorizedKeys
 
 def getApplication(keyFilepath, authorizedKeysFilepath, ports):
 
-    def refreshAuthorizedKeys():
-        checker.authorizedKeys = parseAuthorizedKeysFile(authorizedKeysFilepath)
-
-    def notify(ignored, filepath, mask):
-        if mask == inotify.IN_MODIFY:
-            refreshAuthorizedKeys()
-
     application = service.Application("senka")
     key = getRSAKey(keyFilepath)
-    checker = PublicKeyCredentialsChecker(parseAuthorizedKeysFile(authorizedKeysFilepath))
+    authorizedKeys = parseAuthorizedKeysFile(authorizedKeysFilepath)
+
+    checker = PublicKeyCredentialsChecker(authorizedKeys)
     serverfactory = factory.SSHFactory()
     serverfactory.portal = portal.Portal(SSHRealm())
     serverfactory.portal.registerChecker(checker)
     serverfactory.publicKeys = {'ssh-rsa': key.public()}
     serverfactory.privateKeys = {'ssh-rsa': key}
 
-    notifier = inotify.INotify()
-    notifier.startReading()
-    notifier.watch(authorizedKeysFilepath, callbacks=[notify,])
+    def refreshAuthorizedKeys():
+        checker.authorizedKeys = parseAuthorizedKeysFile(authorizedKeysFilepath)
+
+    if 'inotify' in globals():
+        def notify(ignored, filepath, mask):
+            if mask == inotify.IN_MODIFY:
+                if filepath == authorizedKeysFilepath:
+                    refreshAuthorizedKeys()
+
+        notifier = inotify.INotify()
+        notifier.startReading()
+        notifier.watch(authorizedKeysFilepath, callbacks=[notify,])
 
     for port in ports:
         internet.TCPServer(port, serverfactory).setServiceParent(application)
