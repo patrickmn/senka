@@ -1,6 +1,6 @@
 Senka is an SSH server which only permits traffic forwarding, and only for a list of
-predefined users (identified by their RSA key), which means it's essentially
-a secure, portable tunneler/proxy server.
+predefined users (identified by RSA keys), which means it's essentially a secure,
+portable tunneler/proxy server.
 
 Senka can be used on any server that has Python, regardless of whether the user
 has administrator privileges or access to e.g. the local OpenSSH server.
